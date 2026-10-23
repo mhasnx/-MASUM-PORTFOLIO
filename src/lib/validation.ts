@@ -280,6 +280,16 @@ export const researchPublicationSchema = z.object({
   is_published: z.boolean().default(false),
 });
 
+export const testimonialSchema = z.object({
+  author_name: z.string().trim().min(1).max(160),
+  author_role: z.string().trim().max(160).nullable().default(null),
+  organization: z.string().trim().max(160).nullable().default(null),
+  quote: z.string().trim().min(1).max(5000),
+  source_url: optionalHttpUrl,
+  display_order: z.number().int().min(0).max(100_000).default(0),
+  is_published: z.boolean().default(false),
+});
+
 export const educationSchema = z
   .object({
     institution: z.string().trim().min(1).max(200),

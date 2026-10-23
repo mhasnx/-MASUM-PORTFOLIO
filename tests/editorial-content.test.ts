@@ -10,6 +10,13 @@ const migration = readFileSync(
   ),
   "utf8",
 );
+const testimonialsMigration = readFileSync(
+  new URL(
+    "../supabase/migrations/202610230005_testimonials.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
 const seed = readFileSync(
   new URL("../supabase/seed.sql", import.meta.url),
   "utf8",
@@ -216,6 +223,24 @@ describe("editorial content schema and mapping", () => {
       /revoke all on public\.research_publications from public, anon, authenticated/i,
     );
     expect(migration).not.toMatch(/\b(drop table|truncate|delete from)\b/i);
+  });
+
+  it("restricts public testimonial reads to published records and admin writes", () => {
+    expect(testimonialsMigration).toMatch(
+      /alter table public\.testimonials enable row level security/i,
+    );
+    expect(testimonialsMigration).toMatch(
+      /public read published testimonials[\s\S]*?using \(is_published\)/i,
+    );
+    expect(testimonialsMigration).toMatch(
+      /admins manage testimonials[\s\S]*?public\.is_admin\(\)/i,
+    );
+    expect(testimonialsMigration).toMatch(
+      /revoke all on public\.testimonials from public, anon, authenticated/i,
+    );
+    expect(testimonialsMigration).not.toMatch(
+      /\b(drop table|truncate|delete from)\b/i,
+    );
   });
 
   it("keeps starter seeding insert-only on all conflicting rows", () => {

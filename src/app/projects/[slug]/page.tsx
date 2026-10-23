@@ -126,6 +126,7 @@ async function ProjectContent({ params }: ProjectPageProps) {
           content.supplemental.communityActivities.length > 0
         }
         showResearch={content.supplemental.researchReferences.length > 0}
+        showTestimonials={content.testimonials.length > 0}
         themeDefault={content.themeDefault}
       />
       <main className="project-page section-shell" id="main-content">
@@ -260,6 +261,7 @@ async function ProjectContent({ params }: ProjectPageProps) {
         footerText={content.footerText}
         logoUrl={content.logoUrl}
         profile={content.profile}
+        resumeUrl={content.resumeUrl}
         showAbout={Boolean(
           content.profile.biography ||
             content.profile.professionalInterests.length > 0 ||

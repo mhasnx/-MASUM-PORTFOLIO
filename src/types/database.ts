@@ -171,6 +171,17 @@ export type Database = {
           is_published: boolean;
         }
       >;
+      testimonials: Table<
+        Timestamped & {
+          author_name: string;
+          author_role: string | null;
+          organization: string | null;
+          quote: string;
+          source_url: string | null;
+          display_order: number;
+          is_published: boolean;
+        }
+      >;
       education: Table<
         Timestamped & {
           institution: string;

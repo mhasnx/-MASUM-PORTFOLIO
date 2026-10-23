@@ -183,14 +183,35 @@ on conflict do nothing;
 
 insert into public.research_publications (
   id,
+  title,
   description,
+  authors,
+  venue,
+  publication_year,
+  doi,
   source_url,
   display_order,
   is_published
 )
 values (
   'b468f8a4-7ea2-4059-a4b5-2f7e2a027184',
-  'Paper metadata, author list, author order, and individual contribution are awaiting verification.',
+  'Reinforcement Learning for Optimizing Bowling Strategies in One Day Internationals',
+  'IEEE 28th International Conference on Computer and Information Technology (ICCIT), 2025.',
+  array[
+    'Hasibul Hasan Rupok',
+    'Md. Safiqul Islam Saikat',
+    'Md Shafikul Islam',
+    'Md. Riad Hasan',
+    'Lutfun Nahar Barsha',
+    'Md. Mahmudul Hassan',
+    'Nishat Tamanna',
+    'Md. Tanzimul Ahsan',
+    'Oakimul Sami',
+    'Zaki Asif'
+  ],
+  '2025 28th International Conference on Computer and Information Technology (ICCIT)',
+  2025,
+  '10.1109/iccit68739.2025.11490554',
   'https://ieeexplore.ieee.org/document/11490554',
   1,
   true
@@ -329,6 +350,32 @@ values
     'published',
     3
   )
+on conflict (slug) do nothing;
+
+insert into public.projects (
+  title,
+  slug,
+  summary,
+  description,
+  category,
+  tools,
+  external_url,
+  featured,
+  status,
+  display_order
+)
+values (
+  'KrishiBazaar',
+  'krishibazaar',
+  'A digital agriculture marketplace interface for browsing crop listings by category and region.',
+  'A localized marketplace interface with crop search, category and Bangladesh division browsing, farmer and origin details, and a shopping cart. Checkout and backend behavior have not been independently verified.',
+  'Web Development',
+  array['Next.js', 'React', 'Tailwind CSS'],
+  'https://krishibazaar-frontend.vercel.app',
+  true,
+  'published',
+  4
+)
 on conflict (slug) do nothing;
 
 insert into public.services (

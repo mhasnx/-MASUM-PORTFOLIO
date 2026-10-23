@@ -14,6 +14,7 @@ type PortfolioNavigationProps = {
   showSkills: boolean;
   showServices: boolean;
   showResearch: boolean;
+  showTestimonials: boolean;
   logoUrl?: string | null;
   themeDefault?: "light" | "dark" | "system";
 };
@@ -24,6 +25,7 @@ export function PortfolioNavigation({
   showSkills,
   showServices,
   showResearch,
+  showTestimonials,
   logoUrl = null,
   themeDefault = "system",
 }: PortfolioNavigationProps) {
@@ -47,12 +49,23 @@ export function PortfolioNavigation({
       ...(showResearch
         ? [{ label: "Research", href: "/#research", id: "research" }]
         : []),
+      ...(showTestimonials
+        ? [{ label: "Testimonials", href: "/#testimonials", id: "testimonials" }]
+        : []),
       ...(showExperience
         ? [{ label: "Experience", href: "/#experience", id: "experience" }]
         : []),
       { label: "Contact", href: "/#contact", id: "contact" },
     ],
-    [pathname, showAbout, showExperience, showResearch, showServices, showSkills],
+    [
+      pathname,
+      showAbout,
+      showExperience,
+      showResearch,
+      showServices,
+      showSkills,
+      showTestimonials,
+    ],
   );
 
   useEffect(() => {

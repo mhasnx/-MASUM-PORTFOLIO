@@ -67,6 +67,14 @@ export type CertificationItem = {
   issuedOn: string | null;
 };
 
+export type PortfolioTestimonial = {
+  authorName: string;
+  authorRole: string | null;
+  organization: string | null;
+  quote: string;
+  sourceUrl: string | null;
+};
+
 export type SupplementalPortfolioContent = {
   researchReferences: {
     title: string;
@@ -140,6 +148,7 @@ export type PortfolioContent = {
   projects: PortfolioProject[];
   experience: ExperienceItem[];
   certifications: CertificationItem[];
+  testimonials: PortfolioTestimonial[];
   courses: string[];
   achievements: string[];
   supplemental: SupplementalPortfolioContent;

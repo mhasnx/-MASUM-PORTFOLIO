@@ -21,6 +21,7 @@ import {
   saveService,
   saveSkill,
   saveSkillCategory,
+  saveTestimonial,
   updateContactMessageStatus,
   updateContentOrder,
   updateMediaAsset,
@@ -48,7 +49,8 @@ export async function deletePortfolioContentAction(
     | "experiences"
     | "education"
     | "certifications"
-    | "research_publications",
+    | "research_publications"
+    | "testimonials",
   id: unknown,
 ) {
   return deleteAdminContent(table, id);
@@ -127,6 +129,13 @@ export async function saveResearchPublicationAction(
   return saveResearchPublication(id, input);
 }
 
+export async function saveTestimonialAction(
+  id: unknown | null,
+  input: unknown,
+) {
+  return saveTestimonial(id, input);
+}
+
 export async function updateMediaAssetAction(id: unknown, input: unknown) {
   return updateMediaAsset(id, input);
 }
@@ -179,7 +188,8 @@ export async function updateContentOrderAction(
     | "experiences"
     | "education"
     | "certifications"
-    | "research_publications",
+    | "research_publications"
+    | "testimonials",
   id: unknown,
   input: unknown,
 ) {
@@ -194,7 +204,8 @@ export async function moveContentAction(
     | "experiences"
     | "education"
     | "certifications"
-    | "research_publications",
+    | "research_publications"
+    | "testimonials",
   id: unknown,
   direction: "up" | "down",
 ) {

@@ -67,6 +67,7 @@ async function ProjectsContent() {
           content.supplemental.communityActivities.length > 0
         }
         showResearch={content.supplemental.researchReferences.length > 0}
+        showTestimonials={content.testimonials.length > 0}
         themeDefault={content.themeDefault}
       />
       <main className="projects-page section-shell" id="main-content">
@@ -86,6 +87,7 @@ async function ProjectsContent() {
         footerText={content.footerText}
         logoUrl={content.logoUrl}
         profile={content.profile}
+        resumeUrl={content.resumeUrl}
         showAbout={Boolean(
           content.profile.biography ||
             content.profile.professionalInterests.length > 0 ||

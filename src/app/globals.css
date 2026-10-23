@@ -1802,6 +1802,53 @@ dialog:focus-visible {
   white-space: nowrap;
 }
 
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.testimonial-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 190px;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.testimonial-card blockquote {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-editorial);
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.55;
+}
+
+.testimonial-card figcaption {
+  display: grid;
+  gap: 4px;
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.testimonial-card figcaption > span:first-child {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.testimonial-card figcaption a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  margin-top: 4px;
+  color: var(--ink);
+}
+
 .credentials-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2140,6 +2187,10 @@ main[id] {
 
   .experience-item .experience-dates {
     text-align: left;
+  }
+
+  .testimonial-grid {
+    grid-template-columns: 1fr;
   }
 
   .projects-empty-large {

@@ -13,6 +13,7 @@ export type AdminCmsData = {
   education: Row<"education">[];
   certifications: Row<"certifications">[];
   researchPublications: Row<"research_publications">[];
+  testimonials: Row<"testimonials">[];
   projectRelated: Row<"project_related">[];
   profile: Row<"profiles"> | null;
   siteSettings: Row<"site_settings"> | null;

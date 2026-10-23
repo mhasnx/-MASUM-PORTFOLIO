@@ -20,12 +20,14 @@ import {
   skillCategorySchema,
   siteSettingsSchema,
   skillSchema,
+  testimonialSchema,
   uploadMetadataSchema,
 } from "@/lib/validation";
 import { z } from "zod";
 
 type ProjectInput = z.output<typeof projectSchema>;
 type ResearchPublicationInput = z.output<typeof researchPublicationSchema>;
+type TestimonialInput = z.output<typeof testimonialSchema>;
 type ProjectCategoryInput = z.output<typeof projectCategorySchema>;
 type SkillInput = z.output<typeof skillSchema>;
 type ServiceInput = z.output<typeof serviceSchema>;
@@ -165,6 +167,7 @@ export async function listAdminContent(table: unknown) {
       "education",
       "certifications",
       "research_publications",
+      "testimonials",
       "project_related",
       "media_assets",
       "resume_assets",
@@ -531,6 +534,33 @@ export async function saveResearchPublication(
   return result.data;
 }
 
+export async function saveTestimonial(id: unknown | null, input: unknown) {
+  const testimonial: TestimonialInput = testimonialSchema.parse(input);
+  const supabase = await getAuthorizedClient();
+  const testimonialId = id === null ? null : adminIdSchema.parse(id);
+  const result = testimonialId
+    ? await supabase
+        .from("testimonials")
+        .update(testimonial)
+        .eq("id", testimonialId)
+        .select("id")
+        .single()
+    : await supabase
+        .from("testimonials")
+        .insert(testimonial)
+        .select("id")
+        .single();
+
+  if (result.error) {
+    reportDatabaseError(
+      testimonialId ? "update testimonial" : "create testimonial",
+      result.error,
+    );
+  }
+  refreshPortfolio();
+  return result.data;
+}
+
 export async function saveEducation(id: unknown | null, input: unknown) {
   const education: EducationInput = educationSchema.parse(input);
   const supabase = await getAuthorizedClient();
@@ -859,6 +889,7 @@ export async function getAdminCmsData() {
     education,
     certifications,
     researchPublications,
+    testimonials,
     projectRelated,
     profiles,
     siteSettings,
@@ -878,6 +909,7 @@ export async function getAdminCmsData() {
       .from("research_publications")
       .select("*")
       .order("display_order"),
+    supabase.from("testimonials").select("*").order("display_order"),
     supabase.from("project_related").select("*").order("display_order"),
     supabase.from("profiles").select("*").limit(1),
     supabase.from("site_settings").select("*").eq("id", 1).limit(1),
@@ -899,6 +931,7 @@ export async function getAdminCmsData() {
     ["list education", education.error],
     ["list certifications", certifications.error],
     ["list research publications", researchPublications.error],
+    ["list testimonials", testimonials.error],
     ["list related projects", projectRelated.error],
     ["read profile", profiles.error],
     ["read site settings", siteSettings.error],
@@ -923,6 +956,7 @@ export async function getAdminCmsData() {
     education: education.data ?? [],
     certifications: certifications.data ?? [],
     researchPublications: researchPublications.data ?? [],
+    testimonials: testimonials.data ?? [],
     projectRelated: projectRelated.data ?? [],
     profile: profiles.data?.[0] ?? null,
     siteSettings: siteSettings.data?.[0] ?? null,
@@ -946,6 +980,7 @@ export async function updateContentOrder(
       "education",
       "certifications",
       "research_publications",
+      "testimonials",
     ])
     .parse(table);
   const recordId = adminIdSchema.parse(id);
@@ -979,6 +1014,7 @@ export async function moveAdminContent(
       "education",
       "certifications",
       "research_publications",
+      "testimonials",
     ])
     .parse(table);
   const recordId = adminIdSchema.parse(id);
@@ -1061,6 +1097,7 @@ export async function deleteAdminContent(
       "education",
       "certifications",
       "research_publications",
+      "testimonials",
     ])
     .parse(table);
   const recordId = adminIdSchema.parse(id);

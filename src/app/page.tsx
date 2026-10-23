@@ -5,6 +5,7 @@ import {
   ArrowDown,
   ArrowRight,
   ArrowUpRight,
+  Download,
   GraduationCap,
 } from "lucide-react";
 import { Suspense } from "react";
@@ -112,6 +113,7 @@ async function HomeContent() {
           content.supplemental.communityActivities.length > 0
         }
         showResearch={content.supplemental.researchReferences.length > 0}
+        showTestimonials={content.testimonials.length > 0}
         themeDefault={content.themeDefault}
       />
 
@@ -195,13 +197,11 @@ async function HomeContent() {
               {content.resumeUrl ? (
                 <a
                   className="button button-light"
-                  download
+                  download="Mahmudul-Hassan-Masum-CV.pdf"
                   href={content.resumeUrl}
-                  rel="noreferrer"
-                  target="_blank"
                 >
-                  Download résumé
-                  <ArrowUpRight aria-hidden="true" size={15} />
+                  Download CV
+                  <Download aria-hidden="true" size={15} />
                 </a>
               ) : null}
             </div>
@@ -663,6 +663,56 @@ async function HomeContent() {
           </section>
         ) : null}
 
+        {content.testimonials.length > 0 ? (
+          <section
+            aria-labelledby="testimonials-title"
+            className="content-section testimonials-section"
+            id="testimonials"
+          >
+            <div className="section-shell">
+              <div className="section-heading section-heading-wide">
+                <div>
+                  <p className="eyebrow">
+                    <span className="eyebrow-line" />
+                    Shared words
+                  </p>
+                  <h2 id="testimonials-title">Testimonials</h2>
+                </div>
+              </div>
+              <div className="testimonial-grid">
+                {content.testimonials.map((testimonial, index) => (
+                  <figure
+                    className="testimonial-card"
+                    key={`${testimonial.authorName}-${index}`}
+                  >
+                    <blockquote>{testimonial.quote}</blockquote>
+                    <figcaption>
+                      <span>{testimonial.authorName}</span>
+                      {testimonial.authorRole || testimonial.organization ? (
+                        <span>
+                          {[testimonial.authorRole, testimonial.organization]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </span>
+                      ) : null}
+                      {testimonial.sourceUrl ? (
+                        <a
+                          href={testimonial.sourceUrl}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          View reference
+                          <ArrowUpRight aria-hidden="true" size={13} />
+                        </a>
+                      ) : null}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         <section className="contact-section" id="contact">
           <div className="section-shell contact-inner">
             <div>
@@ -726,6 +776,7 @@ async function HomeContent() {
         footerText={content.footerText}
         logoUrl={content.logoUrl}
         profile={profile}
+        resumeUrl={content.resumeUrl}
         showAbout={Boolean(
           profile.biography ||
             profile.professionalInterests.length > 0 ||

@@ -46,6 +46,7 @@ import {
   saveExperienceAction,
   saveProjectCategoryAction,
   saveResearchPublicationAction,
+  saveTestimonialAction,
   saveRelatedProjectAction,
   saveResumeAssetAction,
   saveServiceAction,
@@ -69,6 +70,7 @@ type EditorSection =
   | "services"
   | "experience"
   | "research"
+  | "testimonials"
   | "education"
   | "certifications"
   | "profile"
@@ -103,6 +105,7 @@ const navItems = [
   { id: "services", label: "Services", icon: Archive },
   { id: "experience", label: "Experience", icon: UserRound },
   { id: "research", label: "Research", icon: FileText },
+  { id: "testimonials", label: "Testimonials", icon: MessageSquare },
   { id: "education", label: "Education", icon: FileText },
   { id: "certifications", label: "Credentials", icon: Check },
   { id: "profile", label: "Profile", icon: UserRound },
@@ -157,6 +160,8 @@ function getVisibleRecords(
       return asRecords(data.experiences);
     case "research":
       return asRecords(data.researchPublications);
+    case "testimonials":
+      return asRecords(data.testimonials);
     case "education":
       return asRecords(data.education);
     case "certifications":
@@ -373,6 +378,16 @@ function fieldDefinitions(
         f("is_published", "Published on the public site", "checkbox"),
         f("display_order", "Display order", "number"),
       ];
+    case "testimonials":
+      return [
+        f("author_name", "Author name"),
+        f("author_role", "Role or title"),
+        f("organization", "Organization"),
+        f("quote", "Testimonial", "textarea"),
+        f("source_url", "Public reference URL", "url"),
+        f("is_published", "Published on the public site", "checkbox"),
+        f("display_order", "Display order", "number"),
+      ];
     case "education":
       return [
         f("institution", "Institution"),
@@ -530,6 +545,15 @@ function newRecord(section: EditorSection): CmsRecord {
       venue: null,
       publication_year: null,
       doi: null,
+      is_published: false,
+      display_order: 0,
+    },
+    testimonials: {
+      author_name: "",
+      author_role: null,
+      organization: null,
+      quote: "",
+      source_url: null,
       is_published: false,
       display_order: 0,
     },
@@ -913,6 +937,9 @@ export function AdminCms({
         case "research":
           await saveResearchPublicationAction(editor.id, payload);
           break;
+        case "testimonials":
+          await saveTestimonialAction(editor.id, payload);
+          break;
         case "education":
           await saveEducationAction(editor.id, payload);
           break;
@@ -957,7 +984,8 @@ export function AdminCms({
       | "experiences"
       | "education"
       | "certifications"
-      | "research_publications",
+      | "research_publications"
+      | "testimonials",
     record: CmsRecord,
     description: string,
   ) {
@@ -1018,7 +1046,8 @@ export function AdminCms({
       | "experiences"
       | "education"
       | "certifications"
-      | "research_publications",
+      | "research_publications"
+      | "testimonials",
     record: CmsRecord,
     offset: -1 | 1,
   ) {
@@ -1434,6 +1463,7 @@ function singularName(section: string): string {
     services: "service",
     experience: "entry",
     research: "publication",
+    testimonials: "testimonial",
     education: "education record",
     certifications: "credential",
     categories: "category",
@@ -1449,6 +1479,7 @@ function canCreate(section: string): boolean {
     "services",
     "experience",
     "research",
+    "testimonials",
     "education",
     "certifications",
     "categories",
@@ -1771,7 +1802,8 @@ function RecordTable({
       | "experiences"
       | "education"
       | "certifications"
-      | "research_publications",
+      | "research_publications"
+      | "testimonials",
     record: CmsRecord,
     description: string,
   ) => void;
@@ -1788,7 +1820,8 @@ function RecordTable({
       | "experiences"
       | "education"
       | "certifications"
-      | "research_publications",
+      | "research_publications"
+      | "testimonials",
     record: CmsRecord,
     offset: -1 | 1,
   ) => void;
@@ -1986,6 +2019,13 @@ function tableColumns(section: string): [string, string][] {
       ["is_published", "Status"],
       ["display_order", "Order"],
     ],
+    testimonials: [
+      ["author_name", "Author"],
+      ["organization", "Organization"],
+      ["quote", "Testimonial"],
+      ["is_published", "Status"],
+      ["display_order", "Order"],
+    ],
     education: [
       ["qualification", "Qualification"],
       ["institution", "Institution"],
@@ -2027,12 +2067,14 @@ function tableName(
   | "education"
   | "certifications"
   | "research_publications"
+  | "testimonials"
   | null {
   if (section === "categories") {
     return categoryKind === "projects" ? "project_categories" : "skill_categories";
   }
   if (section === "experience") return "experiences";
   if (section === "research") return "research_publications";
+  if (section === "testimonials") return "testimonials";
   if (
     section === "projects" ||
     section === "skills" ||
@@ -2055,9 +2097,11 @@ function orderTableName(
   | "education"
   | "certifications"
   | "research_publications"
+  | "testimonials"
   | null {
   if (section === "experience") return "experiences";
   if (section === "research") return "research_publications";
+  if (section === "testimonials") return "testimonials";
   if (
     section === "projects" ||
     section === "skills" ||

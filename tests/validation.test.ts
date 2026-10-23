@@ -9,6 +9,7 @@ import {
   serviceSchema,
   siteSettingsSchema,
   skillSchema,
+  testimonialSchema,
   uploadMetadataSchema,
 } from "../src/lib/validation";
 
@@ -330,6 +331,47 @@ describe("researchPublicationSchema", () => {
         venue: "Verified venue",
         publication_year: 2025,
         doi: "10.1234/example",
+        is_published: true,
+      }).success,
+    ).toBe(true);
+  });
+});
+
+describe("testimonialSchema", () => {
+  it("requires a named author and non-empty quote while defaulting to draft", () => {
+    expect(
+      testimonialSchema.parse({
+        author_name: "Verified person",
+        quote: "A verified comment.",
+      }),
+    ).toMatchObject({
+      author_role: null,
+      organization: null,
+      source_url: null,
+      display_order: 0,
+      is_published: false,
+    });
+    expect(
+      testimonialSchema.safeParse({
+        author_name: " ",
+        quote: " ",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("validates optional testimonial references and publication state", () => {
+    expect(
+      testimonialSchema.safeParse({
+        author_name: "Verified person",
+        quote: "A verified comment.",
+        source_url: "javascript:alert(1)",
+      }).success,
+    ).toBe(false);
+    expect(
+      testimonialSchema.safeParse({
+        author_name: "Verified person",
+        quote: "A verified comment.",
+        source_url: "https://example.com/reference",
         is_published: true,
       }).success,
     ).toBe(true);

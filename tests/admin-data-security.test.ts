@@ -30,6 +30,7 @@ import {
   saveService,
   saveSkill,
   saveSkillCategory,
+  saveTestimonial,
   updateContactMessageStatus,
   updateContentOrder,
   updateMediaAsset,
@@ -135,6 +136,15 @@ describe("administrator data access boundary", () => {
       saveResearchPublication(validId, {
         source_url: "https://example.com/paper",
       }),
+      saveTestimonial(null, {
+        author_name: "Verified person",
+        quote: "A verified comment.",
+      }),
+      saveTestimonial(validId, {
+        author_name: "Verified person",
+        quote: "A verified comment.",
+        is_published: true,
+      }),
       updatePortfolioProfile(validProfile),
       updateSiteSettings({
         site_title: "Portfolio",
@@ -156,6 +166,9 @@ describe("administrator data access boundary", () => {
       }),
       moveAdminContent("research_publications", validId, "up"),
       deleteAdminContent("research_publications", validId),
+      updateContentOrder("testimonials", validId, { display_order: 2 }),
+      moveAdminContent("testimonials", validId, "up"),
+      deleteAdminContent("testimonials", validId),
       updateMediaAsset(validId, {
         storage_bucket: "portfolio-media",
         storage_path: "images/photo.webp",

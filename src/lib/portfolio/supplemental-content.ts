@@ -3,10 +3,26 @@ import type { SupplementalPortfolioContent } from "./types";
 export const supplementalPortfolioContent = {
   researchReferences: [
     {
-      title: "Research reference",
+      title:
+        "Reinforcement Learning for Optimizing Bowling Strategies in One Day Internationals",
       url: "https://ieeexplore.ieee.org/document/11490554",
       description:
-        "Paper metadata, author list, author order, and individual contribution are awaiting verification.",
+        "IEEE 28th International Conference on Computer and Information Technology (ICCIT), 2025.",
+      authors: [
+        "Hasibul Hasan Rupok",
+        "Md. Safiqul Islam Saikat",
+        "Md Shafikul Islam",
+        "Md. Riad Hasan",
+        "Lutfun Nahar Barsha",
+        "Md. Mahmudul Hassan",
+        "Nishat Tamanna",
+        "Md. Tanzimul Ahsan",
+        "Oakimul Sami",
+        "Zaki Asif",
+      ],
+      venue: "2025 28th International Conference on Computer and Information Technology (ICCIT)",
+      publicationYear: 2025,
+      doi: "10.1109/iccit68739.2025.11490554",
     },
   ],
   teachingExperience: [

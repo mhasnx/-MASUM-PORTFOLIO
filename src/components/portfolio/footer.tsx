@@ -9,12 +9,14 @@ export function PortfolioFooter({
   profile,
   footerText,
   logoUrl,
+  resumeUrl,
   showAbout,
   showServices,
 }: {
   profile: PortfolioProfile;
   footerText: string | null;
   logoUrl?: string | null;
+  resumeUrl?: string | null;
   showAbout: boolean;
   showServices: boolean;
 }) {
@@ -39,6 +41,16 @@ export function PortfolioFooter({
         </Link>
         {profile.name ? <p>{profile.name}</p> : null}
         {footerText ? <p>{footerText}</p> : null}
+        {resumeUrl ? (
+          <a
+            className="footer-email"
+            download="Mahmudul-Hassan-Masum-CV.pdf"
+            href={resumeUrl}
+          >
+            Download CV
+            <ArrowUpRight aria-hidden="true" size={13} />
+          </a>
+        ) : null}
         <nav aria-label="Footer navigation" className="footer-quick-links">
           {showAbout ? <Link href="/#about">About</Link> : null}
           {showServices ? <Link href="/#services">Services</Link> : null}

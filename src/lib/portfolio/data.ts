@@ -16,6 +16,7 @@ import type {
   PortfolioProject,
   ProjectResult,
   ProjectScreenshot,
+  PortfolioTestimonial,
   SocialLink,
 } from "./types";
 
@@ -97,6 +98,7 @@ async function getPublishedPortfolioContent(): Promise<PortfolioContent> {
     experienceResult,
     certificationsResult,
     publicationsResult,
+    testimonialsResult,
     settingsResult,
   ] = await Promise.all([
     supabase
@@ -165,6 +167,11 @@ async function getPublishedPortfolioContent(): Promise<PortfolioContent> {
       .eq("is_published", true)
       .order("display_order"),
     supabase
+      .from("testimonials")
+      .select("author_name, author_role, organization, quote, source_url")
+      .eq("is_published", true)
+      .order("display_order"),
+    supabase
       .from("site_settings")
       .select("site_title, default_description, website_url, logo_url, favicon_url, footer_text, theme_default, resume_asset_id")
       .eq("id", 1)
@@ -182,6 +189,7 @@ async function getPublishedPortfolioContent(): Promise<PortfolioContent> {
     experienceResult.error,
     certificationsResult.error,
     publicationsResult.error,
+    testimonialsResult.error,
     settingsResult.error,
   ].filter((error) => error !== null);
 
@@ -287,15 +295,7 @@ async function getPublishedPortfolioContent(): Promise<PortfolioContent> {
   let resumeUrl: string | null = null;
 
   if (resumeQuery.data) {
-    const { data, error } = await supabase.storage
-      .from("resume-documents")
-      .createSignedUrl(resumeQuery.data.storage_path, 300);
-
-    if (error) {
-      throw new Error(`Unable to load the published resume: ${error.message}`);
-    }
-
-    resumeUrl = data.signedUrl;
+    resumeUrl = "/cv.pdf";
   }
 
   return {
@@ -385,6 +385,15 @@ async function getPublishedPortfolioContent(): Promise<PortfolioContent> {
         credentialUrl: item.credential_url,
         issuedOn: item.issued_on,
       })),
+    testimonials: (testimonialsResult.data ?? []).map(
+      (item): PortfolioTestimonial => ({
+        authorName: item.author_name,
+        authorRole: item.author_role,
+        organization: item.organization,
+        quote: item.quote,
+        sourceUrl: item.source_url,
+      }),
+    ),
     courses: [
       ...toStringList(profile?.courses),
       ...(certificationsResult.data ?? [])

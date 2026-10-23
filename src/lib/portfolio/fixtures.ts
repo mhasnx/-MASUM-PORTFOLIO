@@ -189,6 +189,30 @@ export const temporaryPortfolioFixtures: PortfolioContent = {
   ],
   projects: [
     {
+      id: "5c7ee919-e557-4127-a98b-7c356eac52e4",
+      title: "KrishiBazaar",
+      slug: "krishibazaar",
+      summary:
+        "A digital agriculture marketplace interface for browsing crop listings by category and region.",
+      description:
+        "A localized marketplace interface with crop search, category and Bangladesh division browsing, farmer and origin details, and a shopping cart. Checkout and backend behavior have not been independently verified.",
+      category: "Web Development",
+      featured: true,
+      thumbnailUrl: null,
+      thumbnailAlt: null,
+      problem: null,
+      approach: null,
+      solution: null,
+      tools: ["Next.js", "React", "Tailwind CSS"],
+      verifiedResults: [],
+      screenshots: [],
+      liveUrl: "https://krishibazaar-frontend.vercel.app",
+      sourceUrl: null,
+      seoTitle: null,
+      seoDescription: null,
+      relatedProjects: [],
+    },
+    {
       id: "ad042102-fb51-4f29-b05b-e458ac823029",
       title: "Personal Portfolio Website",
       slug: "personal-portfolio-website",
@@ -263,6 +287,7 @@ export const temporaryPortfolioFixtures: PortfolioContent = {
   ],
   experience: [],
   certifications: [],
+  testimonials: [],
   courses: [
     "Data Structures and Algorithms",
     "Object-Oriented Programming",

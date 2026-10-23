@@ -21,6 +21,7 @@ import {
   deleteAdminContent,
   moveAdminContent,
   saveResearchPublication,
+  saveTestimonial,
   saveExperience,
   updateContentOrder,
   updateProject,
@@ -28,6 +29,10 @@ import {
 
 const validPublication = {
   source_url: "https://ieeexplore.ieee.org/document/11490554",
+};
+const validTestimonial = {
+  author_name: "Verified person",
+  quote: "A verified comment.",
 };
 const validProject = {
   title: "Verified project",
@@ -256,6 +261,70 @@ describe("mocked administrator editorial data access", () => {
     ).resolves.toEqual({ id: validId });
     expect(tableFactory).toHaveBeenCalledWith("research_publications");
     expect(databaseQuery.delete).toHaveBeenCalled();
+  });
+
+  it("creates and updates testimonials with explicit publication state", async () => {
+    const createQuery = query({ data: { id: validId }, error: null });
+    tableFactory.mockReturnValue(createQuery);
+
+    await expect(
+      saveTestimonial(null, validTestimonial),
+    ).resolves.toEqual({ id: validId });
+    expect(tableFactory).toHaveBeenCalledWith("testimonials");
+    expect(createQuery.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ...validTestimonial,
+        author_role: null,
+        organization: null,
+        source_url: null,
+        display_order: 0,
+        is_published: false,
+      }),
+    );
+
+    const updateQuery = query({ data: { id: validId }, error: null });
+    tableFactory.mockReturnValue(updateQuery);
+    await saveTestimonial(validId, {
+      ...validTestimonial,
+      is_published: true,
+    });
+    expect(updateQuery.update).toHaveBeenCalledWith(
+      expect.objectContaining({ is_published: true }),
+    );
+    expect(updateQuery.eq).toHaveBeenCalledWith("id", validId);
+  });
+
+  it("deletes and reorders testimonials through the allowlisted CMS path", async () => {
+    const otherId = "d8c61cbd-88c2-42b3-b4e8-34a52fdcfb8c";
+    const records = [
+      { id: validId, display_order: 0 },
+      { id: otherId, display_order: 1 },
+    ];
+    const orderBuilder = { order: vi.fn() };
+    orderBuilder.order
+      .mockReturnValueOnce(orderBuilder)
+      .mockResolvedValue({ data: records, error: null });
+    const readQuery = { select: vi.fn().mockReturnValue(orderBuilder) };
+    const updateQuery = {
+      eq: vi.fn().mockResolvedValue({ error: null }),
+      update: vi.fn().mockReturnThis(),
+    };
+    tableFactory
+      .mockReturnValueOnce(readQuery)
+      .mockReturnValue(updateQuery);
+
+    await expect(
+      moveAdminContent("testimonials", validId, "down"),
+    ).resolves.toEqual({ moved: true });
+    expect(updateQuery.update).toHaveBeenCalledTimes(2);
+
+    const deleteQuery = query({ data: { id: validId }, error: null });
+    tableFactory.mockReturnValue(deleteQuery);
+    await expect(
+      deleteAdminContent("testimonials", validId),
+    ).resolves.toEqual({ id: validId });
+    expect(tableFactory).toHaveBeenCalledWith("testimonials");
+    expect(deleteQuery.delete).toHaveBeenCalled();
   });
 
   it("accepts uploaded project images only when a real image asset exists", async () => {
