@@ -1,11 +1,10 @@
 "use client";
 
 import { initialProfile } from "@/lib/data";
-import { ArrowRight, Mail, Linkedin, Github } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center pt-24 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section id="home" className="relative min-h-screen flex items-center justify-center pt-24 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#0F0C20]">
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#8B5CF6]/15 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-1/3 right-10 w-[300px] h-[300px] bg-[#06B6D4]/10 rounded-full blur-[100px] pointer-events-none" />
 
@@ -34,7 +33,7 @@ export default function Hero() {
             href="#contact"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#8B5CF6] text-white font-semibold hover:bg-[#7C3AED] transition-all shadow-lg shadow-[#8B5CF6]/20"
           >
-            Let's Work Together <ArrowRight className="w-4 h-4" />
+            Let&apos;s Work Together →
           </a>
           <a
             href="#projects"
@@ -45,15 +44,19 @@ export default function Hero() {
         </div>
 
         <div className="flex items-center justify-center gap-5 text-[#A7A3BC]">
-          <a href={initialProfile.linkedin} target="_blank" rel="noreferrer" className="p-2.5 rounded-lg bg-[#16132B] border border-[#30294A] hover:text-[#8B5CF6] hover:border-[#8B5CF6] transition-all">
-            <Linkedin className="w-5 h-5" />
-          </a>
-          <a href={`mailto:${initialProfile.email}`} className="p-2.5 rounded-lg bg-[#16132B] border border-[#30294A] hover:text-[#8B5CF6] hover:border-[#8B5CF6] transition-all">
-            <Mail className="w-5 h-5" />
-          </a>
+          {initialProfile.linkedin && (
+            <a href={initialProfile.linkedin} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-lg bg-[#16132B] border border-[#30294A] hover:text-[#8B5CF6] transition-all text-sm font-medium">
+              LinkedIn
+            </a>
+          )}
+          {initialProfile.email && (
+            <a href={`mailto:${initialProfile.email}`} className="px-4 py-2 rounded-lg bg-[#16132B] border border-[#30294A] hover:text-[#8B5CF6] transition-all text-sm font-medium">
+              Email
+            </a>
+          )}
           {initialProfile.github && (
-            <a href={initialProfile.github} target="_blank" rel="noreferrer" className="p-2.5 rounded-lg bg-[#16132B] border border-[#30294A] hover:text-[#8B5CF6] hover:border-[#8B5CF6] transition-all">
-              <Github className="w-5 h-5" />
+            <a href={initialProfile.github} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-lg bg-[#16132B] border border-[#30294A] hover:text-[#8B5CF6] transition-all text-sm font-medium">
+              GitHub
             </a>
           )}
         </div>

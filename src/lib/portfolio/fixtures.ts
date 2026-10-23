@@ -1,0 +1,278 @@
+import type { PortfolioContent } from "./types";
+import { supplementalPortfolioContent } from "./supplemental-content";
+
+export const temporaryPortfolioFixtures: PortfolioContent = {
+  siteTitle: "MD. Mahmudul Hassan | Software & Web Developer",
+  siteDescription:
+    "Junior software and web developer focused on programming, computer networking, and practical IT solutions.",
+  siteUrl: null,
+  logoUrl: null,
+  faviconUrl: null,
+  footerText: null,
+  themeDefault: "system",
+  profile: {
+    name: "MD. Mahmudul Hassan",
+    professionalTitle: "Junior Software Developer / Web Developer",
+    headline: "Software, web development, and practical IT.",
+    subtitle: "IT & Networking | Final-year CSE Student",
+    introduction:
+      "I am a final-year Computer Science and Engineering student interested in software and web development, programming, computer networking, and practical IT solutions. I bring a multidisciplinary academic background and tutoring experience, and am seeking an entry-level opportunity in software or web development, IT support, or network engineering.",
+    biography:
+      "My interests include building software and websites, solving practical problems, and learning more about IT and computer networking. Alongside my studies, I tutor secondary-school students and value clear communication, careful preparation, and continuous learning.",
+    professionalInterests: [
+      "Software and web development",
+      "Programming and problem-solving",
+      "Computer networking fundamentals",
+      "Practical IT solutions",
+    ],
+    workingApproach: [
+      "Approach technical problems carefully and practically.",
+      "Communicate ideas clearly and keep learning.",
+      "Adapt explanations to support different learners.",
+    ],
+    availabilityLabel: null,
+    isAvailable: false,
+    primaryCtaText: null,
+    primaryCtaHref: null,
+    secondaryCtaText: null,
+    secondaryCtaHref: null,
+    email: "mahmudulhm73@gmail.com",
+    phone: "01747493376",
+    location: "Uttara, Dhaka, Bangladesh",
+    avatarUrl: null,
+    avatarAlt: null,
+    socialLinks: [
+      {
+        label: "LinkedIn",
+        url: "https://www.linkedin.com/in/mhmasum-ptec02",
+      },
+      { label: "GitHub", url: "https://github.com/mhasnx" },
+    ],
+  },
+  education: [
+    {
+      institution: "Uttara University",
+      qualification: "BSc",
+      fieldOfStudy: "Computer Science and Engineering",
+      description:
+        "Final-year student. Expected completion in 2026; official completion date pending confirmation.",
+      startDate: null,
+      endDate: null,
+    },
+    {
+      institution: "Islamic Arabic University (IAU), Bangladesh",
+      qualification: "Fazil (Pass)",
+      fieldOfStudy: null,
+      description:
+        "Expected completion in 2026. Affiliated institute, official program details, and completion date require confirmation.",
+      startDate: null,
+      endDate: null,
+    },
+    {
+      institution: "Kurigram Government College",
+      qualification: "Higher Secondary Certificate (HSC)",
+      fieldOfStudy: null,
+      description: "Completed in 2021 · GPA 5.00",
+      startDate: null,
+      endDate: null,
+    },
+    {
+      institution: "Kamal Khamer Madrasah",
+      qualification: "Dakhil (SSC equivalent)",
+      fieldOfStudy: null,
+      description: "Completed in 2019 · GPA 5.00",
+      startDate: null,
+      endDate: null,
+    },
+  ],
+  skillCategories: [
+    {
+      name: "Programming Languages",
+      skills: ["C", "C++", "C#", "Python", "JavaScript"],
+    },
+    {
+      name: "Frontend Development",
+      skills: ["HTML", "CSS", "JavaScript", "React"],
+    },
+    {
+      name: "Backend Development",
+      skills: ["PHP"],
+    },
+    {
+      name: "Databases & Computer Science",
+      skills: [
+        "Database Management Systems",
+        "Data Structures and Algorithms",
+        "Object-Oriented Programming",
+        "Software Engineering",
+        "Artificial Intelligence and Machine Learning fundamentals",
+      ],
+    },
+    {
+      name: "Tools & Platforms",
+      skills: ["Git/GitHub", "Microsoft Office", "Figma"],
+    },
+    {
+      name: "IT & Networking",
+      skills: ["Computer networking fundamentals"],
+    },
+    {
+      name: "Data & Digital Marketing",
+      skills: ["Data Management", "Excel", "SEO", "Web Analytics"],
+    },
+    {
+      name: "Languages",
+      skills: ["Bangla — Native", "English — Fluent", "Arabic — Reading and writing"],
+    },
+  ],
+  services: [
+    {
+      title: "Data Entry & Data Cleaning",
+      slug: "data-entry-data-cleaning",
+      description:
+        "Organize and clean information with care, keeping accuracy at the center of the process.",
+      deliverables: [],
+      priceAmount: null,
+      priceCurrency: null,
+      availability: null,
+    },
+    {
+      title: "SEO & Website Optimization",
+      slug: "seo-website-optimization",
+      description:
+        "Practical support for search visibility and considered website improvements.",
+      deliverables: [],
+      priceAmount: null,
+      priceCurrency: null,
+      availability: null,
+    },
+    {
+      title: "Web Analytics Setup and Reporting",
+      slug: "web-analytics-reporting",
+      description:
+        "Make website activity easier to understand through useful analytics and reporting.",
+      deliverables: [],
+      priceAmount: null,
+      priceCurrency: null,
+      availability: null,
+    },
+    {
+      title: "Virtual Assistance & Administrative Support",
+      slug: "virtual-assistance-administrative-support",
+      description:
+        "Dependable assistance with organization and day-to-day administrative tasks.",
+      deliverables: [],
+      priceAmount: null,
+      priceCurrency: null,
+      availability: null,
+    },
+    {
+      title: "Spreadsheet Organization and Data Validation",
+      slug: "spreadsheet-organization-data-validation",
+      description:
+        "Structure spreadsheets and check information for consistency and accuracy.",
+      deliverables: [],
+      priceAmount: null,
+      priceCurrency: null,
+      availability: null,
+    },
+    {
+      title: "Programming and Small Technical Solutions",
+      slug: "programming-small-technical-solutions",
+      description:
+        "Explore practical programming and small technical tasks with a clear, focused approach.",
+      deliverables: [],
+      priceAmount: null,
+      priceCurrency: null,
+      availability: null,
+    },
+  ],
+  projects: [
+    {
+      id: "ad042102-fb51-4f29-b05b-e458ac823029",
+      title: "Personal Portfolio Website",
+      slug: "personal-portfolio-website",
+      summary:
+        "A personal portfolio site built with HTML, CSS, and JavaScript.",
+      description:
+        "A static personal web portfolio built with HTML, CSS, and JavaScript. The repository is now named basicdv; its public page contains experience and impact claims that need owner review, so no live-demo link is shown.",
+      category: "Web Development",
+      featured: true,
+      thumbnailUrl: null,
+      thumbnailAlt: null,
+      problem: null,
+      approach: null,
+      solution: null,
+      tools: ["HTML", "CSS", "JavaScript"],
+      verifiedResults: [],
+      screenshots: [],
+      liveUrl: null,
+      sourceUrl: "https://github.com/mhasnx/basicdv",
+      seoTitle: null,
+      seoDescription: null,
+      relatedProjects: [],
+    },
+    {
+      id: "4fc51ada-8f0c-4bc6-b428-6f8d86df5a50",
+      title: "Lost and Found Database System",
+      slug: "lost-and-found-database-system",
+      summary:
+        "A PHP-based missing-and-found persons site with report forms and database-backed record listings.",
+      description:
+        "The public repository contains missing- and found-person report forms, record detail pages, and PHP queries that list stored records. A live deployment has not been verified.",
+      category: "Web Development",
+      featured: true,
+      thumbnailUrl: null,
+      thumbnailAlt: null,
+      problem: null,
+      approach: null,
+      solution: null,
+      tools: ["PHP", "HTML", "CSS", "SQL"],
+      verifiedResults: [],
+      screenshots: [],
+      liveUrl: null,
+      sourceUrl: "https://github.com/mhasnx/lost-and-found-database-",
+      seoTitle: null,
+      seoDescription: null,
+      relatedProjects: [],
+    },
+    {
+      id: "8df3cc7b-3c27-49df-af08-02ae7cc09c1b",
+      title: "ShieldLayer WAF",
+      slug: "shieldlayer-waf",
+      summary:
+        "A PHP MVC web-application firewall project with tenant, role, scanning, rate-limit, and dashboard components.",
+      description:
+        "The public repository contains PHP MVC routing and controllers, tenant and role middleware, security-scanning and rate-limit services, and a database-backed application structure. Security effectiveness and production readiness have not been independently verified.",
+      category: "Software Development",
+      featured: true,
+      thumbnailUrl: null,
+      thumbnailAlt: null,
+      problem: null,
+      approach: null,
+      solution: null,
+      tools: ["PHP", "MySQL/MariaDB", "Composer", "Docker"],
+      verifiedResults: [],
+      screenshots: [],
+      liveUrl: null,
+      sourceUrl: "https://github.com/mhasnx/shieldlayer-waf",
+      seoTitle: null,
+      seoDescription: null,
+      relatedProjects: [],
+    },
+  ],
+  experience: [],
+  certifications: [],
+  courses: [
+    "Data Structures and Algorithms",
+    "Object-Oriented Programming",
+    "Database Management Systems",
+    "Computer Networking",
+    "Software Engineering",
+    "Web Development",
+    "Artificial Intelligence and Machine Learning fundamentals",
+  ],
+  achievements: [],
+  supplemental: supplementalPortfolioContent,
+  resumeUrl: null,
+};

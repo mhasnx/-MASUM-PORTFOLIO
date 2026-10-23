@@ -14,7 +14,7 @@ export default function About() {
           {/* Biography */}
           <div className="lg:col-span-7 space-y-6">
             <h3 className="text-2xl font-bold text-white">
-              Hi, I'm <span className="text-[#8B5CF6]">{initialProfile.name}</span>
+              Hi, I&apos;m <span className="text-[#8B5CF6]">{initialProfile.name}</span>
             </h3>
             <p className="text-[#A7A3BC] text-base leading-relaxed">
               {initialProfile.bio}

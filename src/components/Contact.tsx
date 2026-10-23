@@ -18,7 +18,7 @@ export default function Contact() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Get In Touch</h2>
-          <p className="text-[#A7A3BC]">Have a project or opportunity? Let's discuss details.</p>
+          <p className="text-[#A7A3BC]">Have a project or opportunity? Let&apos;s discuss details.</p>
           <div className="w-16 h-1 bg-[#8B5CF6] mx-auto rounded-full mt-4" />
         </div>
 

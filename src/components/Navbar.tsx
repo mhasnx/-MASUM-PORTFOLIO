@@ -39,7 +39,7 @@ export default function Navbar() {
               href="#contact"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#8B5CF6] text-white text-sm font-medium hover:bg-[#7C3AED] transition-all shadow-lg shadow-[#8B5CF6]/25"
             >
-              Let's Talk <ArrowUpRight className="w-4 h-4" />
+              Let&apos;s Talk <ArrowUpRight className="w-4 h-4" />
             </a>
           </div>
 
@@ -73,7 +73,7 @@ export default function Navbar() {
             onClick={() => setIsOpen(false)}
             className="inline-flex w-full justify-center items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#8B5CF6] text-white text-sm font-medium hover:bg-[#7C3AED] transition-all"
           >
-            Let's Talk <ArrowUpRight className="w-4 h-4" />
+            Let&apos;s Talk <ArrowUpRight className="w-4 h-4" />
           </a>
         </div>
       )}
