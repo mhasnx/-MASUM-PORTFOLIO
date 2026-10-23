@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { createPageMetadata, getSiteOrigin, serializeJsonLd } from "../src/lib/seo";
+import {
+  createPageMetadata,
+  getProjectSeoMetadata,
+  getSiteOrigin,
+  serializeJsonLd,
+} from "../src/lib/seo";
 
 const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
@@ -12,6 +17,42 @@ afterEach(() => {
 });
 
 describe("SEO helpers", () => {
+  it("uses project SEO values and falls back to the title and summary", () => {
+    const project = {
+      title: "Verified project",
+      summary: "Verified project summary.",
+      seoTitle: null,
+      seoDescription: null,
+    };
+
+    expect(getProjectSeoMetadata(project, "Mahmudul Hassan Masum")).toEqual({
+      title: "Verified project | Mahmudul Hassan Masum",
+      description: "Verified project summary.",
+    });
+    expect(
+      getProjectSeoMetadata(
+        {
+          ...project,
+          seoTitle: "Search title",
+          seoDescription: "Search description.",
+        },
+        "Mahmudul Hassan Masum",
+      ),
+    ).toEqual({
+      title: "Search title",
+      description: "Search description.",
+    });
+    expect(
+      getProjectSeoMetadata(
+        { ...project, seoTitle: " ", seoDescription: "" },
+        "",
+      ),
+    ).toEqual({
+      title: "Verified project | Portfolio",
+      description: "Verified project summary.",
+    });
+  });
+
   it("uses only a configured site origin for canonical and social URLs", () => {
     delete process.env.NEXT_PUBLIC_SITE_URL;
 

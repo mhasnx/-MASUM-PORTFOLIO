@@ -5,6 +5,7 @@ import {
   experienceSchema,
   profileSchema,
   projectSchema,
+  researchPublicationSchema,
   serviceSchema,
   siteSettingsSchema,
   skillSchema,
@@ -70,7 +71,7 @@ describe("projectSchema", () => {
 
   it("accepts a valid draft", () => {
     expect(projectSchema.safeParse(validProject).success).toBe(true);
-    expect(projectSchema.parse(validProject)).not.toHaveProperty("seo_title");
+    expect(projectSchema.parse(validProject).seo_title).toBeUndefined();
   });
 
   it("rejects unsafe slugs and unsupported publication status", () => {
@@ -112,6 +113,34 @@ describe("projectSchema", () => {
       projectSchema.safeParse({
         ...validProject,
         seo_description: "x".repeat(321),
+      }).success,
+    ).toBe(false);
+    expect(
+      projectSchema.parse({
+        ...validProject,
+        seo_title: " ",
+        seo_description: "",
+      }),
+    ).toMatchObject({ seo_title: null, seo_description: null });
+  });
+
+  it("accepts an uploaded image reference only with accessible alt text", () => {
+    const uploadedImage = {
+      ...validProject,
+      thumbnail_url: "portfolio-asset:a78b715a-0934-4a50-8b44-11b3e721ae88",
+    };
+    expect(projectSchema.safeParse(uploadedImage).success).toBe(false);
+    expect(
+      projectSchema.safeParse({
+        ...uploadedImage,
+        thumbnail_alt: "Portfolio project preview",
+      }).success,
+    ).toBe(true);
+    expect(
+      projectSchema.safeParse({
+        ...validProject,
+        thumbnail_url: "portfolio-asset:not-a-uuid",
+        thumbnail_alt: "Image",
       }).success,
     ).toBe(false);
   });
@@ -211,6 +240,99 @@ describe("CMS field validation", () => {
         is_published: true,
       }).success,
     ).toBe(false);
+  });
+
+  it.each([
+    "work",
+    "freelance",
+    "training",
+    "course",
+    "achievement",
+    "teaching",
+    "leadership",
+    "community",
+  ])("retains date values and flexible periods for %s experience", (kind) => {
+    const experience = experienceSchema.parse({
+      role: "Verified role",
+      organization: "Verified organization",
+      kind,
+      period_label: "2023–Present",
+      start_date: "2023-01-01",
+      end_date: null,
+      is_current: false,
+    });
+
+    expect(experience).toMatchObject({
+      kind,
+      period_label: "2023–Present",
+      start_date: "2023-01-01",
+      end_date: null,
+    });
+  });
+});
+
+describe("researchPublicationSchema", () => {
+  const validPublication = {
+    source_url: "https://ieeexplore.ieee.org/document/11490554",
+  };
+
+  it("keeps optional publication metadata blank until verified", () => {
+    expect(researchPublicationSchema.parse(validPublication)).toMatchObject({
+      title: null,
+      description: null,
+      authors: [],
+      author_contribution: null,
+      venue: null,
+      publication_year: null,
+      doi: null,
+      is_published: false,
+    });
+    expect(
+      researchPublicationSchema.safeParse({
+        ...validPublication,
+        title: " ",
+        venue: "",
+        doi: "",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("validates HTTPS source links and optional metadata", () => {
+    expect(
+      researchPublicationSchema.safeParse({
+        ...validPublication,
+        source_url: "http://example.com/paper",
+      }).success,
+    ).toBe(false);
+    expect(
+      researchPublicationSchema.safeParse({
+        ...validPublication,
+        source_url: "https://user:password@example.com/paper",
+      }).success,
+    ).toBe(false);
+    expect(
+      researchPublicationSchema.safeParse({
+        ...validPublication,
+        publication_year: 1700,
+      }).success,
+    ).toBe(false);
+    expect(
+      researchPublicationSchema.safeParse({
+        ...validPublication,
+        doi: "not-a-doi",
+      }).success,
+    ).toBe(false);
+    expect(
+      researchPublicationSchema.safeParse({
+        ...validPublication,
+        authors: ["Verified Author"],
+        author_contribution: "Verified contribution",
+        venue: "Verified venue",
+        publication_year: 2025,
+        doi: "10.1234/example",
+        is_published: true,
+      }).success,
+    ).toBe(true);
   });
 });
 

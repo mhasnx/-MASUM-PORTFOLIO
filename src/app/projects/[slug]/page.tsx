@@ -11,7 +11,12 @@ import {
   getPublishedProject,
 } from "@/lib/portfolio/data";
 import { isOptimizablePortfolioImage } from "@/lib/portfolio/image";
-import { createPageMetadata, getSiteOrigin, serializeJsonLd } from "@/lib/seo";
+import {
+  createPageMetadata,
+  getProjectSeoMetadata,
+  getSiteOrigin,
+  serializeJsonLd,
+} from "@/lib/seo";
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>;
@@ -32,14 +37,14 @@ export async function generateMetadata({
   }
 
   const content = await getPortfolioContent();
-  const defaultTitle = content.profile.name
-    ? `${project.title} | ${content.profile.name}`
-    : `${project.title} | Portfolio`;
-  const title = project.seoTitle ?? defaultTitle;
+  const { title, description } = getProjectSeoMetadata(
+    project,
+    content.profile.name,
+  );
 
   return createPageMetadata({
     title,
-    description: project.seoDescription ?? project.summary,
+    description,
     path: `/projects/${project.slug}`,
     siteUrl: content.siteUrl,
     siteName: content.siteTitle,

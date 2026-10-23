@@ -17,6 +17,8 @@ describe("integrated portfolio content", () => {
     );
     expect(profile.email).toBe("mahmudulhm73@gmail.com");
     expect(profile.phone).toBe("01747493376");
+    expect(profile.avatarUrl).toBe("/Profile.png");
+    expect(profile.avatarAlt).toBe("Portrait of MD. Mahmudul Hassan");
     expect(profile.socialLinks).toContainEqual({
       label: "GitHub",
       url: "https://github.com/mhasnx",

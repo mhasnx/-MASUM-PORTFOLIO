@@ -3,6 +3,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { parsePortfolioImageReference } from "@/lib/portfolio/media-reference";
 import {
   adminIdSchema,
   certificationSchema,
@@ -12,6 +13,7 @@ import {
   profileSchema,
   projectCategorySchema,
   projectSchema,
+  researchPublicationSchema,
   relatedProjectSchema,
   resumeMetadataSchema,
   serviceSchema,
@@ -23,6 +25,7 @@ import {
 import { z } from "zod";
 
 type ProjectInput = z.output<typeof projectSchema>;
+type ResearchPublicationInput = z.output<typeof researchPublicationSchema>;
 type ProjectCategoryInput = z.output<typeof projectCategorySchema>;
 type SkillInput = z.output<typeof skillSchema>;
 type ServiceInput = z.output<typeof serviceSchema>;
@@ -39,9 +42,11 @@ function reportDatabaseError(
   operation: string,
   error: { message: string; code?: string },
 ) {
-  console.error(`Administrator data operation failed: ${operation}.`, error);
+  console.error(`Administrator data operation failed: ${operation}.`, {
+    code: error.code ?? "unknown",
+  });
   if (error.code === "23505") {
-    throw new Error("That slug or name is already in use.");
+    throw new Error("A value that must be unique is already in use.");
   }
   throw new Error("The requested portfolio update could not be completed.");
 }
@@ -80,6 +85,35 @@ async function validateProjectCategory(
     throw new Error("Choose an existing project category.");
   }
   return data.name;
+}
+
+async function validateProjectImageReference(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  thumbnailUrl: string | null | undefined,
+): Promise<void> {
+  const assetId = parsePortfolioImageReference(thumbnailUrl);
+  if (!assetId) {
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("media_assets")
+    .select("storage_bucket, media_type")
+    .eq("id", assetId)
+    .maybeSingle();
+
+  if (error) {
+    reportDatabaseError("validate project image", error);
+  }
+  if (
+    !data ||
+    data.storage_bucket !== "portfolio-media" ||
+    !["image/jpeg", "image/png", "image/webp", "image/avif"].includes(
+      data.media_type,
+    )
+  ) {
+    throw new Error("Choose an existing portfolio image asset.");
+  }
 }
 
 async function validateSkillCategory(
@@ -165,6 +199,7 @@ export async function listAdminSingleton(table: unknown) {
 export async function createProject(input: unknown) {
   const project: ProjectInput = projectSchema.parse(input);
   const supabase = await getAuthorizedClient();
+  await validateProjectImageReference(supabase, project.thumbnail_url);
   const categoryName = await validateProjectCategory(
     supabase,
     project.category_id,
@@ -189,6 +224,7 @@ export async function updateProject(id: unknown, input: unknown) {
   const projectId = adminIdSchema.parse(id);
   const project: ProjectInput = projectSchema.parse(input);
   const supabase = await getAuthorizedClient();
+  await validateProjectImageReference(supabase, project.thumbnail_url);
   const categoryName = await validateProjectCategory(
     supabase,
     project.category_id,
@@ -457,6 +493,37 @@ export async function saveExperience(id: unknown | null, input: unknown) {
   if (result.error) {
     reportDatabaseError(
       experienceId ? "update experience" : "create experience",
+      result.error,
+    );
+  }
+  refreshPortfolio();
+  return result.data;
+}
+
+export async function saveResearchPublication(
+  id: unknown | null,
+  input: unknown,
+) {
+  const publication: ResearchPublicationInput =
+    researchPublicationSchema.parse(input);
+  const supabase = await getAuthorizedClient();
+  const publicationId = id === null ? null : adminIdSchema.parse(id);
+  const result = publicationId
+    ? await supabase
+        .from("research_publications")
+        .update(publication)
+        .eq("id", publicationId)
+        .select("id")
+        .single()
+    : await supabase
+        .from("research_publications")
+        .insert(publication)
+        .select("id")
+        .single();
+
+  if (result.error) {
+    reportDatabaseError(
+      publicationId ? "update research publication" : "create research publication",
       result.error,
     );
   }

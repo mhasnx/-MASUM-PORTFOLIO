@@ -39,8 +39,8 @@ export const temporaryPortfolioFixtures: PortfolioContent = {
     email: "mahmudulhm73@gmail.com",
     phone: "01747493376",
     location: "Uttara, Dhaka, Bangladesh",
-    avatarUrl: null,
-    avatarAlt: null,
+    avatarUrl: "/Profile.png",
+    avatarAlt: "Portrait of MD. Mahmudul Hassan",
     socialLinks: [
       {
         label: "LinkedIn",

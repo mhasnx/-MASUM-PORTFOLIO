@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isPortfolioImageReference } from "@/lib/portfolio/media-reference";
 
 const optionalHttpUrl = z
   .url()
@@ -67,8 +68,15 @@ export const projectSchema = z.object({
     .max(20)
     .default([]),
   thumbnail_url: z
-    .url()
-    .refine(isHttpUrl, "Use an HTTP or HTTPS URL.")
+    .union([
+      z.url().refine(isHttpUrl, "Use an HTTP or HTTPS URL."),
+      z
+        .string()
+        .refine(
+          isPortfolioImageReference,
+          "Choose a valid uploaded portfolio image.",
+        ),
+    ])
     .nullable()
     .optional(),
   thumbnail_alt: z.string().trim().max(300).nullable().optional(),
@@ -82,12 +90,37 @@ export const projectSchema = z.object({
     .refine(isHttpUrl, "Use an HTTP or HTTPS URL.")
     .nullable()
     .optional(),
-  seo_title: z.string().trim().min(1).max(70).nullable().optional(),
-  seo_description: z.string().trim().min(1).max(320).nullable().optional(),
+  seo_title: z
+    .string()
+    .trim()
+    .max(70)
+    .nullable()
+    .optional()
+    .transform((value) =>
+      value === undefined ? undefined : value || null,
+    ),
+  seo_description: z
+    .string()
+    .trim()
+    .max(320)
+    .nullable()
+    .optional()
+    .transform((value) =>
+      value === undefined ? undefined : value || null,
+    ),
   featured: z.boolean().default(false),
   status: z.enum(["draft", "published"]),
   display_order: z.number().int().min(0).max(100_000).default(0),
-});
+}).refine(
+  (project) =>
+    !project.thumbnail_url ||
+    !isPortfolioImageReference(project.thumbnail_url) ||
+    Boolean(project.thumbnail_alt?.trim()),
+  {
+    message: "Add alt text for the selected uploaded image.",
+    path: ["thumbnail_alt"],
+  },
+);
 
 export const projectCategorySchema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -183,6 +216,69 @@ export const experienceSchema = z
     message: "Current experience cannot have an end date.",
     path: ["end_date"],
   });
+
+export const researchPublicationSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .max(300)
+    .nullable()
+    .optional()
+    .transform((value) => value || null),
+  description: z
+    .string()
+    .trim()
+    .max(20_000)
+    .nullable()
+    .optional()
+    .transform((value) => value || null),
+  authors: z.array(z.string().trim().min(1).max(300)).max(100).default([]),
+  author_contribution: z
+    .string()
+    .trim()
+    .max(2000)
+    .nullable()
+    .optional()
+    .transform((value) => value || null),
+  venue: z
+    .string()
+    .trim()
+    .max(300)
+    .nullable()
+    .optional()
+    .transform((value) => value || null),
+  publication_year: z
+    .number()
+    .int()
+    .min(1800)
+    .max(2200)
+    .nullable()
+    .default(null),
+  doi: z
+    .string()
+    .trim()
+    .max(300)
+    .nullable()
+    .optional()
+    .refine((value) => !value || /^10\.\d{4,9}\/\S+$/.test(value), {
+      message: "Enter a valid DOI identifier or leave this field blank.",
+    })
+    .transform((value) => value || null),
+  source_url: z
+    .url()
+    .refine(
+      (value) => {
+        const url = new URL(value);
+        return (
+          url.protocol === "https:" && !url.username && !url.password
+        );
+      },
+      "Use an HTTPS URL without embedded credentials.",
+    )
+    .max(2048),
+  display_order: z.number().int().min(0).max(100_000).default(0),
+  is_published: z.boolean().default(false),
+});
 
 export const educationSchema = z
   .object({

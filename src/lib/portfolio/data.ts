@@ -3,6 +3,11 @@ import "server-only";
 import { cache } from "react";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createPublishedAssetUrl } from "@/lib/storage";
+import {
+  parsePortfolioImageReference,
+  resolvePortfolioImageReference,
+} from "@/lib/portfolio/media-reference";
 import { temporaryPortfolioFixtures } from "./fixtures";
 import { mapEditorialContent } from "./map-editorial-content";
 import { supplementalPortfolioContent } from "./supplemental-content";
@@ -154,7 +159,9 @@ async function getPublishedPortfolioContent(): Promise<PortfolioContent> {
       .order("display_order"),
     supabase
       .from("research_publications")
-      .select("title, description, source_url, display_order, is_published")
+      .select(
+        "title, description, authors, author_contribution, venue, publication_year, doi, source_url, display_order, is_published",
+      )
       .eq("is_published", true)
       .order("display_order"),
     supabase
@@ -217,8 +224,34 @@ async function getPublishedPortfolioContent(): Promise<PortfolioContent> {
     }))
     .filter((category) => category.skills.length > 0);
 
-  const projects: PortfolioProject[] = (projectsResult.data ?? []).map(
-    (project) => ({
+  const projectRows = projectsResult.data ?? [];
+  const referencedAssetIds = [
+    ...new Set(
+      projectRows
+        .map((project) => parsePortfolioImageReference(project.thumbnail_url))
+        .filter((id): id is string => id !== null),
+    ),
+  ];
+  const publishedAssetsResult = referencedAssetIds.length
+    ? await supabase
+        .from("media_assets")
+        .select("id, storage_path")
+        .in("id", referencedAssetIds)
+        .eq("is_published", true)
+    : { data: [], error: null };
+
+  if (publishedAssetsResult.error) {
+    throw new Error("Unable to load published project images.");
+  }
+
+  const publishedAssets = new Map(
+    (publishedAssetsResult.data ?? []).map((asset) => [
+      asset.id,
+      asset.storage_path,
+    ]),
+  );
+  const projects: PortfolioProject[] = await Promise.all(
+    projectRows.map(async (project) => ({
       id: project.id,
       title: project.title,
       slug: project.slug,
@@ -226,7 +259,12 @@ async function getPublishedPortfolioContent(): Promise<PortfolioContent> {
       description: project.description,
       category: project.category,
       featured: project.featured,
-      thumbnailUrl: project.thumbnail_url,
+      thumbnailUrl: await resolvePortfolioImageReference(
+        project.thumbnail_url,
+        publishedAssets,
+        (storagePath) =>
+          createPublishedAssetUrl("portfolio-media", storagePath),
+      ),
       thumbnailAlt: project.thumbnail_alt,
       problem: project.problem,
       approach: project.approach,
@@ -239,7 +277,7 @@ async function getPublishedPortfolioContent(): Promise<PortfolioContent> {
       seoTitle: project.seo_title,
       seoDescription: project.seo_description,
       relatedProjects: [],
-    }),
+    })),
   );
   const editorialContent = mapEditorialContent(
     publicationsResult.data ?? [],
@@ -291,8 +329,9 @@ async function getPublishedPortfolioContent(): Promise<PortfolioContent> {
           email: profile.email,
           phone: profile.phone,
           location: profile.location,
-          avatarUrl: profile.avatar_url,
-          avatarAlt: profile.avatar_alt,
+          avatarUrl: profile.avatar_url ?? "/Profile.png",
+          avatarAlt:
+            profile.avatar_alt ?? "Portrait of MD. Mahmudul Hassan",
           socialLinks: toSocialLinks(profile.social_links),
         }
       : {

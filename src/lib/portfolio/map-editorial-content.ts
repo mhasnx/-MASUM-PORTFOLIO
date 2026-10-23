@@ -19,7 +19,16 @@ type ExperienceRow = Pick<
 
 type ResearchPublicationRow = Pick<
   Database["public"]["Tables"]["research_publications"]["Row"],
-  "title" | "description" | "source_url" | "display_order" | "is_published"
+  | "title"
+  | "description"
+  | "authors"
+  | "author_contribution"
+  | "venue"
+  | "publication_year"
+  | "doi"
+  | "source_url"
+  | "display_order"
+  | "is_published"
 >;
 
 export function mapEditorialContent(
@@ -56,6 +65,11 @@ export function mapEditorialContent(
           title: item.title ?? "Research reference",
           url: item.source_url,
           description: item.description ?? "",
+          authors: item.authors,
+          authorContribution: item.author_contribution,
+          venue: item.venue,
+          publicationYear: item.publication_year,
+          doi: item.doi,
         })),
       teachingExperience: publishedExperiences
         .filter((item) => item.kind === "teaching")

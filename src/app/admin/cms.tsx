@@ -29,6 +29,11 @@ import { Dialog } from "@/components/ui/dialog";
 import { Notification } from "@/components/ui/notification";
 import type { AdminCmsData } from "@/lib/admin/types";
 import {
+  makePortfolioImageReference,
+  parsePortfolioImageReference,
+  PORTFOLIO_IMAGE_REFERENCE_PREFIX,
+} from "@/lib/portfolio/media-reference";
+import {
   createProjectAction,
   deleteContactMessageAction,
   deletePortfolioAssetAction,
@@ -40,6 +45,7 @@ import {
   saveEducationAction,
   saveExperienceAction,
   saveProjectCategoryAction,
+  saveResearchPublicationAction,
   saveRelatedProjectAction,
   saveResumeAssetAction,
   saveServiceAction,
@@ -62,6 +68,7 @@ type EditorSection =
   | "skill-categories"
   | "services"
   | "experience"
+  | "research"
   | "education"
   | "certifications"
   | "profile"
@@ -95,6 +102,7 @@ const navItems = [
   { id: "skills", label: "Skills", icon: Check },
   { id: "services", label: "Services", icon: Archive },
   { id: "experience", label: "Experience", icon: UserRound },
+  { id: "research", label: "Research", icon: FileText },
   { id: "education", label: "Education", icon: FileText },
   { id: "certifications", label: "Credentials", icon: Check },
   { id: "profile", label: "Profile", icon: UserRound },
@@ -129,6 +137,8 @@ function getVisibleRecords(
     case "projects":
       return asRecords(data.projects).map((project) => ({
         ...project,
+        thumbnail_asset_id:
+          parsePortfolioImageReference(asString(project.thumbnail_url)) ?? "",
         related_project_ids: data.projectRelated
           .filter((relation) => relation.project_id === project.id)
           .sort((first, second) => first.display_order - second.display_order)
@@ -145,6 +155,8 @@ function getVisibleRecords(
       return asRecords(data.services);
     case "experience":
       return asRecords(data.experiences);
+    case "research":
+      return asRecords(data.researchPublications);
     case "education":
       return asRecords(data.education);
     case "certifications":
@@ -192,6 +204,21 @@ function fieldDefinitions(
       label: `${project.title} · ${project.slug}`,
       value: project.id,
     }));
+  const mediaAssetOptions = [
+    { label: "No uploaded image selected", value: "" },
+    ...data.mediaAssets
+      .filter(
+        (asset) =>
+          asset.storage_bucket === "portfolio-media" &&
+          ["image/jpeg", "image/png", "image/webp", "image/avif"].includes(
+            asset.media_type,
+          ),
+      )
+      .map((asset) => ({
+        label: `${asset.storage_path}${asset.is_published ? " · published" : " · private"}`,
+        value: asset.id,
+      })),
+  ];
   const f = (
     name: string,
     label: string,
@@ -208,8 +235,21 @@ function fieldDefinitions(
         f("summary", "Summary", "textarea"),
         f("description", "Overview", "textarea"),
         f("category_id", "Category", "select", projectCategories),
-        f("thumbnail_url", "Thumbnail URL", "url"),
-        f("thumbnail_alt", "Thumbnail alt text"),
+        f(
+          "thumbnail_asset_id",
+          "Uploaded thumbnail image",
+          "select",
+          mediaAssetOptions,
+          "Select an uploaded image, or leave this blank to use an external thumbnail URL.",
+        ),
+        f("thumbnail_url", "External thumbnail URL", "url"),
+        f(
+          "thumbnail_alt",
+          "Thumbnail alt text",
+          "text",
+          undefined,
+          "Required when an uploaded image is selected.",
+        ),
         f("problem", "Problem", "textarea"),
         f("approach", "Approach", "textarea"),
         f("solution", "Solution", "textarea"),
@@ -232,6 +272,20 @@ function fieldDefinitions(
         ),
         f("external_url", "Live demo URL", "url"),
         f("source_url", "Source repository URL", "url"),
+        f(
+          "seo_title",
+          "SEO title",
+          "text",
+          undefined,
+          "Optional; up to 70 characters. Leave blank to use the project title.",
+        ),
+        f(
+          "seo_description",
+          "SEO description",
+          "textarea",
+          undefined,
+          "Optional; up to 320 characters. Leave blank to use the project summary.",
+        ),
         f("status", "Publication", "select", [
           { label: "Draft", value: "draft" },
           { label: "Published", value: "published" },
@@ -284,16 +338,39 @@ function fieldDefinitions(
           { label: "Training", value: "training" },
           { label: "Course", value: "course" },
           { label: "Achievement", value: "achievement" },
+          { label: "Teaching", value: "teaching" },
+          { label: "Leadership", value: "leadership" },
+          { label: "Community", value: "community" },
         ]),
         f("role", "Role or title"),
         f("organization", "Organization"),
         f("description", "Description", "textarea"),
+        f(
+          "period_label",
+          "Flexible period label",
+          "text",
+          undefined,
+          "Optional text such as 2023–Present. Existing start/end dates are retained separately.",
+        ),
         f("start_date", "Start date", "date"),
         f("end_date", "End date", "date"),
         f("is_current", "Current position", "checkbox"),
         f("external_url", "Reference URL", "url"),
         f("skills", "Related skills (one per line)", "lines"),
         f("is_published", "Published", "checkbox"),
+        f("display_order", "Display order", "number"),
+      ];
+    case "research":
+      return [
+        f("source_url", "Source URL", "url", undefined, "Use the HTTPS source page."),
+        f("title", "Publication title", "text", undefined, "Leave blank if unverified."),
+        f("description", "Description", "textarea"),
+        f("authors", "Authors (one per line)", "lines", undefined, "Only enter verified author names and order."),
+        f("author_contribution", "Author contribution", "textarea", undefined, "Leave blank unless your role is verified."),
+        f("venue", "Journal or venue", "text", undefined, "Optional; enter only when verified."),
+        f("publication_year", "Publication year", "number"),
+        f("doi", "DOI", "text", undefined, "Optional; use the DOI identifier, for example 10.1234/example."),
+        f("is_published", "Published on the public site", "checkbox"),
         f("display_order", "Display order", "number"),
       ];
     case "education":
@@ -404,6 +481,9 @@ function newRecord(section: EditorSection): CmsRecord {
       screenshots: [],
       thumbnail_url: null,
       thumbnail_alt: null,
+      thumbnail_asset_id: "",
+      seo_title: null,
+      seo_description: null,
       external_url: null,
       source_url: null,
       featured: false,
@@ -441,6 +521,17 @@ function newRecord(section: EditorSection): CmsRecord {
       skills: [],
       display_order: 0,
       is_published: false,
+    },
+    research: {
+      title: null,
+      description: null,
+      authors: [],
+      author_contribution: null,
+      venue: null,
+      publication_year: null,
+      doi: null,
+      is_published: false,
+      display_order: 0,
     },
     education: {
       field_of_study: null,
@@ -508,7 +599,12 @@ function toFormValues(
 ): FormValues {
   return Object.fromEntries(
     definitions.map(({ name, kind }) => {
-      const value = record[name];
+      const value =
+        name === "thumbnail_url" &&
+        typeof record.thumbnail_url === "string" &&
+        record.thumbnail_url.startsWith(PORTFOLIO_IMAGE_REFERENCE_PREFIX)
+          ? ""
+          : record[name];
       if (kind === "checkbox") {
         return [name, value === true];
       }
@@ -632,7 +728,11 @@ export function AdminCms({
   const [preview, setPreview] = useState<CmsRecord | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [editorError, setEditorError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [pendingRecordAction, setPendingRecordAction] = useState<string | null>(
+    null,
+  );
   const [uploadKind, setUploadKind] = useState<"image" | "resume">("image");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -710,6 +810,7 @@ export function AdminCms({
     }
     setError("");
     setMessage("");
+    setEditorError("");
     setEditor({
       section: editSection,
       record: source,
@@ -728,6 +829,7 @@ export function AdminCms({
     if (!editor) return;
     setSaving(true);
     setError("");
+    setEditorError("");
     try {
       const definitions = fieldDefinitions(
         editor.section,
@@ -741,6 +843,16 @@ export function AdminCms({
       );
       switch (editor.section) {
         case "projects": {
+          const selectedThumbnailAsset = payload.thumbnail_asset_id;
+          delete payload.thumbnail_asset_id;
+          if (
+            typeof selectedThumbnailAsset === "string" &&
+            selectedThumbnailAsset
+          ) {
+            payload.thumbnail_url = makePortfolioImageReference(
+              selectedThumbnailAsset,
+            );
+          }
           const requestedRelatedIds = Array.isArray(payload.related_project_ids)
             ? payload.related_project_ids.filter(
                 (value): value is string => typeof value === "string",
@@ -798,6 +910,9 @@ export function AdminCms({
         case "experience":
           await saveExperienceAction(editor.id, payload);
           break;
+        case "research":
+          await saveResearchPublicationAction(editor.id, payload);
+          break;
         case "education":
           await saveEducationAction(editor.id, payload);
           break;
@@ -822,7 +937,7 @@ export function AdminCms({
       setMessage("Changes saved to the portfolio database.");
       router.refresh();
     } catch (caught) {
-      setError(
+      setEditorError(
         caught instanceof Error
           ? caught.message
           : "The changes could not be saved. Please try again.",
@@ -841,15 +956,19 @@ export function AdminCms({
       | "services"
       | "experiences"
       | "education"
-      | "certifications",
+      | "certifications"
+      | "research_publications",
     record: CmsRecord,
     description: string,
   ) {
+    const actionKey = `${table}:${asId(record)}:delete`;
+    if (pendingRecordAction) return;
     if (!window.confirm(`Delete “${description}”? This cannot be undone.`)) {
       return;
     }
     setError("");
     setMessage("");
+    setPendingRecordAction(actionKey);
     try {
       await deletePortfolioContentAction(table, asId(record));
       setMessage("The record was deleted.");
@@ -860,6 +979,8 @@ export function AdminCms({
           ? caught.message
           : "The record could not be deleted.",
       );
+    } finally {
+      setPendingRecordAction(null);
     }
   }
 
@@ -896,10 +1017,16 @@ export function AdminCms({
       | "services"
       | "experiences"
       | "education"
-      | "certifications",
+      | "certifications"
+      | "research_publications",
     record: CmsRecord,
     offset: -1 | 1,
   ) {
+    const actionKey = `${type}:${asId(record)}:order`;
+    if (pendingRecordAction) return;
+    setPendingRecordAction(actionKey);
+    setError("");
+    setMessage("");
     try {
       const result = await moveContentAction(
         type,
@@ -920,6 +1047,8 @@ export function AdminCms({
           ? caught.message
           : "The display order could not be updated.",
       );
+    } finally {
+      setPendingRecordAction(null);
     }
   }
 
@@ -1187,6 +1316,13 @@ export function AdminCms({
                   {filteredRows.length} {filteredRows.length === 1 ? "record" : "records"}
                 </span>
               </div>
+              {pendingRecordAction ? (
+                <p className="cms-note" role="status">
+                  {pendingRecordAction.endsWith(":order")
+                    ? "Updating display order…"
+                    : "Deleting record…"}
+                </p>
+              ) : null}
               {filteredRows.length ? (
                 <RecordTable
                   categoryKind={categoryKind}
@@ -1201,6 +1337,7 @@ export function AdminCms({
                   onPreview={setPreview}
                   onProjectToggle={toggleProject}
                   onReorder={reorder}
+                  pendingRecordAction={pendingRecordAction}
                   records={filteredRows}
                   section={section}
                 />
@@ -1239,6 +1376,7 @@ export function AdminCms({
           initialValues={toFormValues(editor.record, editorDefinitions)}
           onClose={closeEditor}
           onSave={saveEditor}
+          saveError={editorError}
           saving={saving}
         />
       ) : null}
@@ -1255,13 +1393,21 @@ export function AdminCms({
             <h3>{asString(preview.title)}</h3>
             <p>{asString(preview.summary)}</p>
             {preview.thumbnail_url ? (
-              <Image
-                alt={asString(preview.thumbnail_alt) || "Project image preview"}
-                height={450}
-                unoptimized
-                src={asString(preview.thumbnail_url)}
-                width={900}
-              />
+              asString(preview.thumbnail_url).startsWith(
+                PORTFOLIO_IMAGE_REFERENCE_PREFIX,
+              ) ? (
+                <p className="cms-note">
+                  Uploaded image preview is available on the public site after its asset is published.
+                </p>
+              ) : (
+                <Image
+                  alt={asString(preview.thumbnail_alt) || "Project image preview"}
+                  height={450}
+                  unoptimized
+                  src={asString(preview.thumbnail_url)}
+                  width={900}
+                />
+              )
             ) : null}
             <p>{asString(preview.description) || "No overview added yet."}</p>
             <p className="cms-preview-meta">
@@ -1287,6 +1433,7 @@ function singularName(section: string): string {
     skills: "skill",
     services: "service",
     experience: "entry",
+    research: "publication",
     education: "education record",
     certifications: "credential",
     categories: "category",
@@ -1301,6 +1448,7 @@ function canCreate(section: string): boolean {
     "skills",
     "services",
     "experience",
+    "research",
     "education",
     "certifications",
     "categories",
@@ -1607,6 +1755,7 @@ function RecordTable({
   onProjectToggle,
   onPreview,
   onReorder,
+  pendingRecordAction,
 }: {
   records: CmsRecord[];
   section: string;
@@ -1621,7 +1770,8 @@ function RecordTable({
       | "services"
       | "experiences"
       | "education"
-      | "certifications",
+      | "certifications"
+      | "research_publications",
     record: CmsRecord,
     description: string,
   ) => void;
@@ -1637,10 +1787,12 @@ function RecordTable({
       | "services"
       | "experiences"
       | "education"
-      | "certifications",
+      | "certifications"
+      | "research_publications",
     record: CmsRecord,
     offset: -1 | 1,
   ) => void;
+  pendingRecordAction: string | null;
 }) {
   const columns = tableColumns(section);
   const deleteTable = tableName(section, categoryKind);
@@ -1656,7 +1808,17 @@ function RecordTable({
         </thead>
         <tbody>
           {records.map((record) => (
-            <tr key={asId(record)}>
+            <tr
+              aria-busy={
+                (orderTable !== null &&
+                  pendingRecordAction ===
+                    `${orderTable}:${asId(record)}:order`) ||
+                (deleteTable !== null &&
+                  pendingRecordAction ===
+                    `${deleteTable}:${asId(record)}:delete`)
+              }
+              key={asId(record)}
+            >
               {columns.map(([key]) => (
                 <td key={key}>
                   {key === "status" || key === "is_published" ? (
@@ -1730,6 +1892,7 @@ function RecordTable({
                     <button
                       aria-label={`Move ${displayValue(record, columns[0][0])} earlier`}
                       className="cms-icon-button"
+                      disabled={Boolean(pendingRecordAction)}
                       onClick={() => onReorder(orderTable, record, -1)}
                       title="Move earlier"
                       type="button"
@@ -1739,6 +1902,7 @@ function RecordTable({
                     <button
                       aria-label={`Move ${displayValue(record, columns[0][0])} later`}
                       className="cms-icon-button"
+                      disabled={Boolean(pendingRecordAction)}
                       onClick={() => onReorder(orderTable, record, 1)}
                       title="Move later"
                       type="button"
@@ -1760,6 +1924,7 @@ function RecordTable({
                   <button
                     aria-label={`Delete ${displayValue(record, columns[0][0])}`}
                     className="cms-icon-button is-danger"
+                    disabled={Boolean(pendingRecordAction)}
                     onClick={() =>
                       onDelete(
                         deleteTable,
@@ -1809,8 +1974,17 @@ function tableColumns(section: string): [string, string][] {
       ["role", "Role"],
       ["organization", "Organization"],
       ["kind", "Type"],
+      ["period_label", "Period"],
       ["start_date", "Start date"],
       ["is_published", "Status"],
+    ],
+    research: [
+      ["title", "Publication"],
+      ["venue", "Venue"],
+      ["publication_year", "Year"],
+      ["source_url", "Source URL"],
+      ["is_published", "Status"],
+      ["display_order", "Order"],
     ],
     education: [
       ["qualification", "Qualification"],
@@ -1852,11 +2026,13 @@ function tableName(
   | "experiences"
   | "education"
   | "certifications"
+  | "research_publications"
   | null {
   if (section === "categories") {
     return categoryKind === "projects" ? "project_categories" : "skill_categories";
   }
   if (section === "experience") return "experiences";
+  if (section === "research") return "research_publications";
   if (
     section === "projects" ||
     section === "skills" ||
@@ -1878,8 +2054,10 @@ function orderTableName(
   | "experiences"
   | "education"
   | "certifications"
+  | "research_publications"
   | null {
   if (section === "experience") return "experiences";
+  if (section === "research") return "research_publications";
   if (
     section === "projects" ||
     section === "skills" ||
@@ -1898,6 +2076,7 @@ function EditorDialog({
   initialValues,
   onClose,
   onSave,
+  saveError,
   saving,
 }: {
   editor: { section: EditorSection; record: CmsRecord; id: string | null };
@@ -1905,6 +2084,7 @@ function EditorDialog({
   initialValues: FormValues;
   onClose: (dirty: boolean) => void;
   onSave: (values: FormValues) => void;
+  saveError: string;
   saving: boolean;
 }) {
   const [values, setValues] = useState(initialValues);
@@ -1947,6 +2127,7 @@ function EditorDialog({
     >
       <form className="cms-editor-form" onSubmit={submit}>
         {localError ? <Notification tone="error">{localError}</Notification> : null}
+        {saveError ? <Notification tone="error">{saveError}</Notification> : null}
         {definitions.map((definition) => (
           <label
             className={

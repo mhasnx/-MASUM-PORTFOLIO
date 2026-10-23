@@ -72,6 +72,11 @@ export type SupplementalPortfolioContent = {
     title: string;
     url: string;
     description: string;
+    authors?: string[];
+    authorContribution?: string | null;
+    venue?: string | null;
+    publicationYear?: number | null;
+    doi?: string | null;
   }[];
   teachingExperience: {
     title: string;

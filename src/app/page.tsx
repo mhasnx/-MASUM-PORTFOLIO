@@ -509,6 +509,20 @@ async function HomeContent() {
                   <article className="experience-item" key={reference.url}>
                     <div>
                       <h3>{reference.title}</h3>
+                      {reference.venue || reference.publicationYear ? (
+                        <p>
+                          {[reference.venue, reference.publicationYear]
+                            .filter((value) => value !== null && value !== undefined)
+                            .join(" · ")}
+                        </p>
+                      ) : null}
+                      {reference.authors?.length ? (
+                        <p>Authors: {reference.authors.join(", ")}</p>
+                      ) : null}
+                      {reference.authorContribution ? (
+                        <p>{reference.authorContribution}</p>
+                      ) : null}
+                      {reference.doi ? <p>DOI: {reference.doi}</p> : null}
                       {reference.description ? (
                         <p>{reference.description}</p>
                       ) : null}

@@ -10,6 +10,22 @@ type PageMetadataOptions = {
   type?: "website" | "article";
 };
 
+export function getProjectSeoMetadata(project: {
+  title: string;
+  summary: string;
+  seoTitle: string | null;
+  seoDescription: string | null;
+}, profileName: string): { title: string; description: string } {
+  const defaultTitle = profileName
+    ? `${project.title} | ${profileName}`
+    : `${project.title} | Portfolio`;
+
+  return {
+    title: project.seoTitle?.trim() || defaultTitle,
+    description: project.seoDescription?.trim() || project.summary,
+  };
+}
+
 export function getSiteOrigin(siteUrl?: string | null): string | null {
   const configuredSiteUrl = siteUrl ?? process.env.NEXT_PUBLIC_SITE_URL;
 

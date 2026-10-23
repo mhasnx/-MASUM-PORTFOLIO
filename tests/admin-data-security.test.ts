@@ -24,6 +24,7 @@ import {
   saveEducation,
   saveExperience,
   saveProjectCategory,
+  saveResearchPublication,
   saveRelatedProject,
   saveResumeAsset,
   saveService,
@@ -109,6 +110,12 @@ describe("administrator data access boundary", () => {
     };
     const mutations = [
       createProject(validProject),
+      createProject({
+        ...validProject,
+        thumbnail_url:
+          "portfolio-asset:a78b715a-0934-4a50-8b44-11b3e721ae88",
+        thumbnail_alt: "Project image",
+      }),
       updateProject(validId, validProject),
       deleteProject(validId),
       saveProjectCategory(null, { name: "Category", slug: "category" }),
@@ -122,6 +129,12 @@ describe("administrator data access boundary", () => {
       saveExperience(null, { role: "Role", organization: "Organization" }),
       saveEducation(null, { institution: "University", qualification: "Degree" }),
       saveCertification(null, { name: "Credential", issuer: "Issuer" }),
+      saveResearchPublication(null, {
+        source_url: "https://example.com/paper",
+      }),
+      saveResearchPublication(validId, {
+        source_url: "https://example.com/paper",
+      }),
       updatePortfolioProfile(validProfile),
       updateSiteSettings({
         site_title: "Portfolio",

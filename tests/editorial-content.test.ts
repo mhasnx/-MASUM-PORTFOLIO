@@ -26,13 +26,27 @@ describe("editorial content schema and mapping", () => {
         {
           title: null,
           description: "Metadata and authorship remain unverified.",
+          authors: [],
+          author_contribution: null,
+          venue: null,
+          publication_year: null,
+          doi: null,
           source_url: "https://ieeexplore.ieee.org/document/11490554",
           display_order: 1,
           is_published: true,
         },
       ] satisfies Pick<
         PublicationRow,
-        "title" | "description" | "source_url" | "display_order" | "is_published"
+        | "title"
+        | "description"
+        | "authors"
+        | "author_contribution"
+        | "venue"
+        | "publication_year"
+        | "doi"
+        | "source_url"
+        | "display_order"
+        | "is_published"
       >[],
       [
         {
@@ -87,6 +101,11 @@ describe("editorial content schema and mapping", () => {
         title: "Research reference",
         url: "https://ieeexplore.ieee.org/document/11490554",
         description: "Metadata and authorship remain unverified.",
+        authors: [],
+        authorContribution: null,
+        venue: null,
+        publicationYear: null,
+        doi: null,
       },
     ]);
     expect(mapped.supplemental.teachingExperience[0].period).toBe(
@@ -116,6 +135,11 @@ describe("editorial content schema and mapping", () => {
         {
           title: "Unpublished",
           description: null,
+          authors: [],
+          author_contribution: null,
+          venue: null,
+          publication_year: null,
+          doi: null,
           source_url: "https://example.com/draft",
           display_order: 1,
           is_published: false,
@@ -140,6 +164,37 @@ describe("editorial content schema and mapping", () => {
     expect(mapped.experience).toEqual([]);
     expect(mapped.supplemental.teachingExperience).toEqual([]);
     expect(mapped.supplemental.communityActivities).toEqual([]);
+  });
+
+  it("renders only explicitly supplied publication metadata", () => {
+    const mapped = mapEditorialContent(
+      [
+        {
+          title: "Verified title",
+          description: "Verified summary.",
+          authors: ["Verified author"],
+          author_contribution: "Verified contribution",
+          venue: "Verified venue",
+          publication_year: 2025,
+          doi: "10.1234/example",
+          source_url: "https://example.com/paper",
+          display_order: 0,
+          is_published: true,
+        },
+      ],
+      [],
+    );
+
+    expect(mapped.supplemental.researchReferences[0]).toEqual({
+      title: "Verified title",
+      url: "https://example.com/paper",
+      description: "Verified summary.",
+      authors: ["Verified author"],
+      authorContribution: "Verified contribution",
+      venue: "Verified venue",
+      publicationYear: 2025,
+      doi: "10.1234/example",
+    });
   });
 
   it("adds SEO fields and RLS-protected publication records without destructive SQL", () => {
